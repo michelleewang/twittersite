@@ -3,6 +3,9 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import AuthenticationForm
 from googletrans import Translator
 from googletrans import LANGUAGES
 
@@ -12,19 +15,44 @@ from .models import Tweet, Comment
 #def post(request):
 
 class HomePageView(generic.ListView): # take user to 'home page'
-    template_name = 'home.html'
+    #template_name = 'home.html'
     context_object_name = 'latest_tweet_list'
 
-    def get_queryset(self):
-        """ Return the last five published tweets (not including those set to
-        be published in the future). """
-        """context = {'latest_tweet_list': Tweet.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]}
-        return context"""
-        return Tweet.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]
-    """def get(self, request):
-        return render(template_name)
-    def post(request):
-        return"""
+    """def get_queryset(self):
+        Return the last five published tweets (not including those set to
+        be published in the future).
+        context = {'latest_tweet_list': Tweet.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]}
+        return context
+        return Tweet.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]"""
+    def get(self, request):
+        # built-in authenticaion form
+        form = AuthenticationForm()
+        context = {
+            'form': form,
+            'allPosts': self.context_object_name,
+            'user': request.user,
+        }
+        return render(request, 'twit/home.html', context)
+
+    def post(self, request):
+        if 'logout' in request.POST.keys():
+            # log out
+            logout(request)
+            form = AuthenticationForm()
+        else:
+            form = AuthenticationForm(data=request.POST)
+            if form.is_valid():
+                username = form.cleaned_data['username']
+                password = form.cleaned_data['password']
+                # authenticate and log in
+                user = authenticate(username = username, password = password)
+                if user is not None:
+                    login(request, user = user)
+        context = {
+            'form': form,
+            'allPosts': self.context_object_name,
+        }
+        return render(request, 'twit/home.html', context)
 
 
 class DetailView(generic.DetailView): # take user to a specific tweet
@@ -85,7 +113,8 @@ def translating(request, tweet_id): # allow user to leave a comment
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
-        return HttpResponseRedirect(reverse('twit:detail', args=(tweet.id,)))
+        return return render(request, 'twit/detail.html', {})
+        #HttpResponseRedirect(reverse('twit:detail', args=(tweet.id,)))
 
     """tweet = get_object_or_404(Tweet, pk=tweet_id)
     try:
