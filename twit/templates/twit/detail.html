@@ -103,7 +103,23 @@ section:after {
         <h1>{{ tweet.tweet_text }}</h1>
       </ul>
     </nav>
-    <nav style="background:inherit">
+    <nav  style="background:inherit">
+    <form>
+
+      <form action="{% url 'twit:translating' tweet.id %}" method="post">
+
+      <label for="translate">Translate to:</label><br>
+
+      <input type="radio" id="en" name="lang" value="en">
+      <label for="en">English</label><br>
+      <input type="radio" id="es" name="lang" value="es">
+      <label for="es">Spanish</label><br>
+      <input type="radio" id="fr" name="lang" value="fr">
+      <label for="fr">French</label>
+
+      <input href="{% url 'twit:detail' tweet.id %}" type="submit" value="Submit">
+      </form>
+    </form>
       <ul>
         <h4>Comments:</h4>
       {% for comment in tweet.comment_set.all %}
@@ -123,6 +139,7 @@ section:after {
 </div>
 
 <script>
+
 function openTab(evt, tabName) {
   var i, tabcontent, tablinks;
   tabcontent = document.getElementsByClassName("tabcontent");
@@ -137,6 +154,11 @@ function openTab(evt, tabName) {
   evt.currentTarget.className += " active";
 }
 document.getElementById("defaultOpen").click();
+
+function translate() {
+  var language = document.getElementById("lang").value;
+  document.getElementById("translation").innerHTML = "hi";
+}
 </script>
 </body>
 </html>

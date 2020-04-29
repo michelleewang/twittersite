@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
+from googletrans import Translator
+from googletrans import LANGUAGES
 
 from .models import Tweet, Comment
 
@@ -43,9 +45,8 @@ def commenting(request, tweet_id): # allow user to leave a comment
     tweet = get_object_or_404(Tweet, pk=int(request.POST["tweet_id"]))
     try:
         selected_tweet = Tweet.objects.get(pk=tweet.id)
-        print(selected_tweet)
         all_comments = selected_tweet.comment_set.all()
-        print(all_comments)
+        print(request.POST["comment"])
         comment = Comment(tweet=tweet, comment_text=request.POST["comment"])
         comment.save()
         print(comment.id)
@@ -56,8 +57,31 @@ def commenting(request, tweet_id): # allow user to leave a comment
             'error_message': "You didn't enter a comment.",
         })
     else:
-        #selected_comment.likes += 1
-        #selected_comment.save()
+        # Always return an HttpResponseRedirect after successfully dealing
+        # with POST data. This prevents data from being posted twice if a
+        # user hits the Back button.
+        return HttpResponseRedirect(reverse('twit:detail', args=(tweet.id,)))
+
+def translating(request, tweet_id): # allow user to leave a comment
+    # change code so that it checks if input box is empty and not if a radio button is selected
+    # return HttpResponse("You're commenting on tweet %s." % tweet_id)
+    print(request.POST)
+    tweet = get_object_or_404(Tweet, pk=int(request.POST["tweet_id"]))
+    try:
+        lang = request.POST["lang"]
+        print(lang)
+        trans = Translator()
+        t = trans.translate(
+            tweet.tweet_text, src=lang
+        )
+        print(f'Destination: {t.dest}')
+    except (KeyError, lang.DoesNotExist):
+        # Redisplay the comment input form
+        return render(request, 'twit/detail.html', {
+            'tweet': tweet,
+            'error_message': "You didn't select a language.",
+        })
+    else:
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.

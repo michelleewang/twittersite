@@ -8,4 +8,5 @@ urlpatterns = [
     path('<int:pk>/', views.DetailView.as_view(), name='detail'),
     path('<int:pk>/comment/', views.CommentView.as_view(), name='comment'),
     path('<int:tweet_id>/commenting/', views.commenting, name='commenting'),
+    path('<int:tweet_id>/translating/', views.translating, name='translating'),
 ]
